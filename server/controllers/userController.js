@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const asyncHandler = require('express-async-handler'); // Recommended if you use it, otherwise standard async/await is fine
 const User = require('../models/userModel');
 
 // Generate JWT Token
@@ -26,15 +26,15 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ message: 'User already exists' });
   }
 
-  // Hash password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  // ❌ REMOVED: Manual Hashing (The model handles this now)
+  // const salt = await bcrypt.genSalt(10);
+  // const hashedPassword = await bcrypt.hash(password, salt);
 
   // Create user
   const user = await User.create({
     name,
     email,
-    password: hashedPassword,
+    password, // 👈 Just pass the plain password! The model will hash it.
   });
 
   if (user) {
@@ -42,7 +42,7 @@ const registerUser = async (req, res) => {
       _id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role, // Include role (default is 'user')
+      role: user.role,
       token: generateToken(user.id),
     });
   } else {
@@ -59,7 +59,8 @@ const loginUser = async (req, res) => {
   // Check for user email
   const user = await User.findOne({ email });
 
-  if (user && (await bcrypt.compare(password, user.password))) {
+  // 👇 CHANGED: Use the matchPassword method from your model
+  if (user && (await user.matchPassword(password))) {
     res.json({
       _id: user.id,
       name: user.name,
