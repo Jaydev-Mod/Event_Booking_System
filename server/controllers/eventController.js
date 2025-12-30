@@ -43,4 +43,41 @@ const createEvent = async (req, res) => {
   res.status(201).json(createdEvent);
 };
 
-module.exports = { getEvents, getEventById, createEvent };
+// @desc    Delete an event
+// @route   DELETE /api/events/:id
+// @access  Private/Admin
+const deleteEvent = async (req, res) => {
+  const event = await Event.findById(req.params.id);
+
+  if (event) {
+    await event.deleteOne();
+    res.json({ message: 'Event removed' });
+  } else {
+    res.status(404).json({ message: 'Event not found' });
+  }
+};
+
+// @desc    Update an event
+// @route   PUT /api/events/:id
+// @access  Private/Admin
+const updateEvent = async (req, res) => {
+  const event = await Event.findById(req.params.id);
+
+  if (event) {
+    event.title = req.body.title || event.title;
+    event.description = req.body.description || event.description;
+    event.date = req.body.date || event.date;
+    event.time = req.body.time || event.time;
+    event.location = req.body.location || event.location;
+    event.price = req.body.price || event.price;
+    event.totalSeats = req.body.totalSeats || event.totalSeats;
+    event.image = req.body.image || event.image;
+
+    const updatedEvent = await event.save();
+    res.json(updatedEvent);
+  } else {
+    res.status(404).json({ message: 'Event not found' });
+  }
+};
+
+module.exports = { getEvents, getEventById, createEvent, deleteEvent, updateEvent };

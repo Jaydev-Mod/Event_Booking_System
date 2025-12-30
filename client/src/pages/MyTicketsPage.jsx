@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
-import { Calendar, MapPin, Ticket } from 'lucide-react';
+import { Calendar, MapPin, Ticket, AlertCircle } from 'lucide-react'; // Added AlertCircle
 import { Link } from 'react-router-dom';
 
 const MyTicketsPage = () => {
@@ -40,28 +40,46 @@ const MyTicketsPage = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {bookings.map((booking) => (
-            <div key={booking._id} className="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row justify-between items-center border-l-4 border-blue-500">
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{booking.event.title}</h3>
-                <div className="flex space-x-4 text-sm text-gray-500 mb-2">
-                  <div className="flex items-center"><Calendar className="w-4 h-4 mr-1" /> {new Date(booking.event.date).toLocaleDateString()}</div>
-                  <div className="flex items-center"><MapPin className="w-4 h-4 mr-1" /> {booking.event.location}</div>
+          {bookings.map((booking) => {
+            // 👇 CRASH FIX: Check if event exists
+            if (!booking.event) {
+              return (
+                <div key={booking._id} className="bg-gray-100 p-6 rounded-lg shadow border-l-4 border-gray-400">
+                  <div className="flex items-center text-gray-500">
+                    <AlertCircle className="w-6 h-6 mr-2" />
+                    <div>
+                      <h3 className="text-xl font-bold">Event Cancelled or Deleted</h3>
+                      <p className="text-sm">Booking ID: {booking._id}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm">
-                  <span className="font-semibold text-gray-700">Booking ID:</span> {booking._id}
+              );
+            }
+
+            // Normal render if event exists
+            return (
+              <div key={booking._id} className="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row justify-between items-center border-l-4 border-blue-500">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">{booking.event.title}</h3>
+                  <div className="flex space-x-4 text-sm text-gray-500 mb-2">
+                    <div className="flex items-center"><Calendar className="w-4 h-4 mr-1" /> {new Date(booking.event.date).toLocaleDateString()}</div>
+                    <div className="flex items-center"><MapPin className="w-4 h-4 mr-1" /> {booking.event.location}</div>
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-gray-700">Booking ID:</span> {booking._id}
+                  </div>
+                </div>
+                
+                <div className="mt-4 md:mt-0 text-right">
+                  <div className="text-2xl font-bold text-blue-600">{booking.numberOfTickets} <span className="text-sm text-gray-500 font-normal">Tickets</span></div>
+                  <div className="text-gray-600">Total: ${booking.totalAmount}</div>
+                  <span className="inline-block px-3 py-1 mt-2 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                    Confirmed
+                  </span>
                 </div>
               </div>
-              
-              <div className="mt-4 md:mt-0 text-right">
-                <div className="text-2xl font-bold text-blue-600">{booking.numberOfTickets} <span className="text-sm text-gray-500 font-normal">Tickets</span></div>
-                <div className="text-gray-600">Total: ${booking.totalAmount}</div>
-                <span className="inline-block px-3 py-1 mt-2 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                  Confirmed
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
