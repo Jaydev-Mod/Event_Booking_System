@@ -87,7 +87,7 @@ const EventDetailsPage = () => {
             
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <h3 className="font-semibold text-blue-800 mb-2">Ticket Information</h3>
-              <p className="text-sm text-blue-600">Price per ticket: <span className="font-bold text-lg">${event.price}</span></p>
+              <p className="text-sm text-blue-600">Price per ticket: <span className="font-bold text-lg">₹{event.price}</span></p>
               <p className="text-sm text-blue-600">Seats Available: <span className="font-bold">{event.availableSeats}</span> / {event.totalSeats}</p>
             </div>
           </div>
@@ -110,7 +110,7 @@ const EventDetailsPage = () => {
 
               <div className="flex justify-between items-center mb-6 text-lg font-semibold">
                 <span>Total:</span>
-                <span>${event.price * ticketCount}</span>
+                <span>₹{event.price * ticketCount}</span>
               </div>
 
               <button 
