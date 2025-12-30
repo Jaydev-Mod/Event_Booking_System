@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import CreateEventPage from './pages/CreateEventPage';
 import EditEventPage from './pages/EditEventPage';
+import PaymentPage from './pages/PaymentPage';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,13 +22,14 @@ function App() {
           
           <Routes>
             <Route path="/" element={<HomePage searchTerm={searchTerm} />} />
-            
+          
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/event/:id" element={<EventDetailsPage />} />
             <Route path="/my-tickets" element={<MyTicketsPage />} />
             <Route path="/create-event" element={<CreateEventPage />} />
             <Route path="/edit-event/:id" element={<EditEventPage />} />
+            <Route path="/payment/:id" element={<PaymentPage />} />
           </Routes>
         </div>
       </Router>

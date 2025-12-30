@@ -1,19 +1,19 @@
 import { useEffect, useState, useContext } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom'; // 👈 1. Import useNavigate
 import axios from 'axios';
-import { Calendar, MapPin, Clock, Ticket } from 'lucide-react';
-import AuthContext from '../context/AuthContext'; // <--- Import Context
+import { Calendar, MapPin, Clock } from 'lucide-react';
+import AuthContext from '../context/AuthContext';
 
 const EventDetailsPage = () => {
   const { id } = useParams();
-  const { user } = useContext(AuthContext); // <--- Get User
-  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate(); // 👈 2. Initialize it here
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ticketCount, setTicketCount] = useState(1);
-  const [bookingLoading, setBookingLoading] = useState(false); // <--- New state for button loading
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -29,38 +29,14 @@ const EventDetailsPage = () => {
     fetchEvent();
   }, [id]);
 
-  const handleBooking = async () => {
-    // 1. Check if user is logged in
+  // 👇 3. This function handles the redirect
+  const handleBookTicket = () => {
     if (!user) {
-      alert("Please login to book tickets");
+      alert('Please login to book tickets');
       navigate('/login');
       return;
     }
-
-    // 2. Start Booking Process
-    if (window.confirm(`Confirm booking for ${ticketCount} tickets? Total: $${event.price * ticketCount}`)) {
-      setBookingLoading(true);
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${user.token}`, // <--- Send Token!
-          },
-        };
-
-        await axios.post(
-          '/api/bookings',
-          { eventId: id, numberOfTickets: ticketCount },
-          config
-        );
-
-        alert('Booking Successful! 🎉');
-        navigate('/'); // Redirect to home
-      } catch (error) {
-        alert(error.response?.data?.message || 'Booking failed');
-      } finally {
-        setBookingLoading(false);
-      }
-    }
+    navigate(`/payment/${id}?qty=${ticketCount}`);
   };
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
@@ -83,7 +59,7 @@ const EventDetailsPage = () => {
         <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <h2 className="text-2xl font-bold mb-4">About this Event</h2>
-            <p className="text-gray-600 leading-relaxed mb-6">{event.description}</p>
+            <p className="text-gray-600 leading-relaxed mb-6 whitespace-pre-line">{event.description}</p>
             
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <h3 className="font-semibold text-blue-800 mb-2">Ticket Information</h3>
@@ -113,8 +89,9 @@ const EventDetailsPage = () => {
                 <span>₹{event.price * ticketCount}</span>
               </div>
 
+              {/* 👇 4. Verify the onClick matches the function name */}
               <button 
-                onClick={handleBooking}
+                onClick={handleBookTicket} 
                 disabled={bookingLoading || event.availableSeats === 0}
                 className={`w-full text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center
                   ${event.availableSeats === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}
