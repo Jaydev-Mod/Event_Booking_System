@@ -1,22 +1,27 @@
+import { useState } from 'react'; // <--- Import useState
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import EventDetailsPage from './pages/EventDetailsPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import CreateEventPage from './pages/CreateEventPage';
-import RegisterPage from './pages/RegisterPage';
 import EditEventPage from './pages/EditEventPage';
 
 function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+
   return (
-    <AuthProvider> 
+    <AuthProvider>
       <Router>
         <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-          <Navbar />
+          <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomePage searchTerm={searchTerm} />} />
+            
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/event/:id" element={<EventDetailsPage />} />

@@ -6,11 +6,12 @@ import AuthContext from '../context/AuthContext';
 const CreateEventPage = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    image: '', 
+    category: 'Music',
+    image: '',
     date: '',
     time: '',
     location: '',
@@ -38,7 +39,7 @@ const CreateEventPage = () => {
       };
 
       const { data } = await axios.post('/api/upload', formDataObj, config);
-      
+
       setFormData((prev) => ({ ...prev, image: data.url }));
       setUploading(false);
     } catch (error) {
@@ -54,7 +55,7 @@ const CreateEventPage = () => {
       const config = {
         headers: { Authorization: `Bearer ${user.token}` }
       };
-      
+
       await axios.post('/api/events', formData, config);
       alert('Event Created Successfully!');
       navigate('/');
@@ -67,7 +68,7 @@ const CreateEventPage = () => {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Create New Event</h1>
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-4">
-        
+
         <div>
           <label className="block text-gray-700 font-bold mb-2">Event Title</label>
           <input name="title" onChange={handleChange} className="w-full p-2 border rounded" required />
@@ -78,26 +79,41 @@ const CreateEventPage = () => {
           <textarea name="description" onChange={handleChange} className="w-full p-2 border rounded h-32" required />
         </div>
 
-        {/* 👇 NEW: File Input Field */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-2">Category</label>
+          <select
+            name="category"
+            onChange={handleChange}
+            value={formData.category}
+            className="w-full p-2 border rounded bg-white"
+          >
+            <option value="Music">Music</option>
+            <option value="Business">Business</option>
+            <option value="Performing & Visual Arts">Performing & Visual Arts</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Sports">Sports</option>
+          </select>
+        </div>
+
         <div>
           <label className="block text-gray-700 font-bold mb-2">Event Image</label>
-          <input 
-            type="file" 
+          <input
+            type="file"
             accept="image/jpeg, image/png"
             onChange={handleFileChange}
-            className="w-full p-2 border rounded" 
+            className="w-full p-2 border rounded"
           />
           {uploading && <p className="text-blue-500 text-sm mt-1">Uploading...</p>}
           {formData.image && (
-             <div className="mt-2">
-                <p className="text-green-600 text-sm mb-1">Image Uploaded!</p>
-                <img 
-                  // If it's a local path, add localhost:5000. If it's a web URL, use as is.
-                  src={formData.image.startsWith('http') ? formData.image : `http://localhost:5000${formData.image}`} 
-                  alt="Preview" 
-                  className="h-32 w-auto object-cover rounded border" 
-                />
-             </div>
+            <div className="mt-2">
+              <p className="text-green-600 text-sm mb-1">Image Uploaded!</p>
+              <img
+                // If it's a local path, add localhost:5000. If it's a web URL, use as is.
+                src={formData.image.startsWith('http') ? formData.image : `http://localhost:5000${formData.image}`}
+                alt="Preview"
+                className="h-32 w-auto object-cover rounded border"
+              />
+            </div>
           )}
         </div>
 

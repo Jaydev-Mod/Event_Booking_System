@@ -25,11 +25,12 @@ const getEventById = async (req, res) => {
 // @route   POST /api/events
 // @access  Public (We will make this Admin only later)
 const createEvent = async (req, res) => {
-  const { title, description, date, time, location, price, totalSeats, image } = req.body;
+  const { title, description, category, date, time, location, price, totalSeats, image } = req.body;
 
   const event = new Event({
     title,
     description,
+    category,
     date,
     time,
     location,
@@ -66,6 +67,7 @@ const updateEvent = async (req, res) => {
   if (event) {
     event.title = req.body.title || event.title;
     event.description = req.body.description || event.description;
+    event.category = req.body.category || event.category;
     event.date = req.body.date || event.date;
     event.time = req.body.time || event.time;
     event.location = req.body.location || event.location;

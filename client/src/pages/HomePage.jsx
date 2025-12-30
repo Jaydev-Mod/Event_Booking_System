@@ -1,15 +1,28 @@
 import { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import { Calendar, MapPin, Clock, Trash2, Edit, Search } from 'lucide-react';
+import { Calendar, MapPin, Clock, Trash2, Edit, Music, Briefcase, Coffee, Code, Trophy, Palette } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 
-const HomePage = () => {
+// 👇 Accept searchTerm as a prop
+const HomePage = ({ searchTerm }) => {
   const { user } = useContext(AuthContext);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  // 👇 NEW: Category State
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Define our categories with icons
+  const categories = [
+    { name: 'All', icon: null },
+    { name: 'Music', icon: <Music className="w-4 h-4" /> },
+    { name: 'Business', icon: <Briefcase className="w-4 h-4" /> },
+    { name: 'Performing & Visual Arts', icon: <Palette className="w-4 h-4" /> },
+    { name: 'Workshop', icon: <Coffee className="w-4 h-4" /> },
+    { name: 'Sports', icon: <Trophy className="w-4 h-4" /> },
+  ];
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -22,7 +35,6 @@ const HomePage = () => {
         setLoading(false);
       }
     };
-
     fetchEvents();
   }, []);
 
@@ -44,10 +56,17 @@ const HomePage = () => {
     }
   };
 
-  const filteredEvents = events.filter((event) => 
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch = 
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = 
+      selectedCategory === 'All' || 
+      event.category === selectedCategory; // 👈 Exact match on DB field
+
+    return matchesSearch && matchesCategory;
+  });
 
   if (loading) return <div className="text-center mt-10">Loading events...</div>;
   if (error) return <div className="text-center mt-10 text-red-500">{error}</div>;
@@ -55,31 +74,30 @@ const HomePage = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       
-      {/* 🔍 MODIFIED: Smaller Hero & Search Bar */}
-      <div className="bg-blue-900 rounded-lg p-6 mb-8 text-center text-white shadow-lg">
-        <h1 className="text-2xl font-bold mb-4">Find your next experience</h1>
-        
-        {/* Changed max-w-2xl to max-w-md (Medium) to make it smaller */}
-        <div className="max-w-md mx-auto relative">
-          <input 
-            type="text" 
-            placeholder="Search events..." 
-            // Reduced padding from p-4 to p-3 for a slimmer look
-            className="w-full p-3 pl-10 rounded-full text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-xl"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {/* Adjusted icon position */}
-          <Search className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-        </div>
+      {/* 👇 NEW: Category Filter Bar */}
+      <div className="flex flex-wrap gap-4 mb-8 justify-center">
+        {categories.map((cat) => (
+          <button
+            key={cat.name}
+            onClick={() => setSelectedCategory(cat.name)}
+            className={`flex items-center px-6 py-2 rounded-full border transition-all duration-200 
+              ${selectedCategory === cat.name 
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+              }`}
+          >
+            {cat.icon && <span className="mr-2">{cat.icon}</span>}
+            {cat.name}
+          </button>
+        ))}
       </div>
 
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
-        {searchTerm ? `Results for "${searchTerm}"` : 'Upcoming Events'}
+        {searchTerm ? `Results for "${searchTerm}"` : `${selectedCategory} Events`}
       </h2>
 
       {filteredEvents.length === 0 ? (
-        <p className="text-center text-gray-500 mt-10">No events found matching your search.</p>
+        <p className="text-center text-gray-500 mt-10">No events found matching your criteria.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredEvents.map((event) => (
@@ -92,9 +110,8 @@ const HomePage = () => {
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 
-                {/* 💰 UPDATED: Rupee Symbol */}
                 <div className="absolute bottom-4 right-4 bg-white px-3 py-1 rounded-md shadow-md font-bold text-sm">
-                  ₹{event.price}
+                  {event.price === 0 ? 'Free' : `₹${event.price}`}
                 </div>
               </div>
 

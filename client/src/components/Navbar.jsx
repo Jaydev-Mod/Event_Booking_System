@@ -1,75 +1,89 @@
-import { Link, useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import { LogOut, User } from 'lucide-react';
+import { Search } from 'lucide-react';
 
-const Navbar = () => {
-    const { user, logout } = useContext(AuthContext);
-    const navigate = useNavigate();
+const Navbar = ({ searchTerm, setSearchTerm }) => {
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-    return (
-        <nav className="bg-white shadow-lg">
-            <div className="max-w-6xl mx-auto px-4">
-                <div className="flex justify-between">
-                    <div className="flex space-x-7">
-                        <Link to="/" className="flex items-center py-4 px-2">
-                            <span className="font-semibold text-gray-500 text-lg">
-                                Event<span className="text-blue-600">Booking</span>
-                            </span>
-                        </Link>
-                    </div>
+  return (
+    <nav className="bg-white shadow-md sticky top-0 z-50">
+      {/* 👇 CHANGED: Removed 'max-w-6xl mx-auto' so it spans full width */}
+      <div className="w-full px-6"> 
+        {/* 👇 CHANGED: Added 'justify-between' to force items to edges */}
+        <div className="flex justify-between items-center h-16">
+          
+          {/* LEFT: Logo */}
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <span className="text-2xl font-bold text-blue-600">EventBooking</span>
+          </Link>
 
-                    <div className="flex items-center space-x-3">
-                        {user ? (
-                            // IF LOGGED IN: Show Name + Logout
-                            <>
-                                {user.role === 'admin' && (
-                                    <Link to="/create-event" className="text-gray-600 hover:text-green-600 font-medium mr-4">
-                                        Create Event
-                                    </Link>
-                                )}
-                                <Link to="/my-tickets" className="text-gray-600 hover:text-blue-600 font-medium mr-4">
-                                    My Tickets
-                                </Link>
-                                <div className="flex items-center text-gray-700 mr-4">
-                                    <User className="w-4 h-4 mr-2" />
-                                    <span className="font-semibold">{user.name}</span>
-                                </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="py-2 px-3 font-medium text-red-500 hover:bg-red-50 rounded transition duration-300 flex items-center"
-                                >
-                                    <LogOut className="w-4 h-4 mr-1" />
-                                    Logout
-                                </button>
-                            </>
-                        ) : (
-                            // IF LOGGED OUT: Show Login + Register
-                            <>
-                                <Link
-                                    to="/login"
-                                    className="py-2 px-2 font-medium text-gray-500 rounded hover:bg-blue-500 hover:text-white transition duration-300"
-                                >
-                                    Log In
-                                </Link>
-                                <Link
-                                    to="/register"
-                                    className="py-2 px-2 font-medium text-white bg-blue-500 rounded hover:bg-blue-400 transition duration-300"
-                                >
-                                    Sign Up
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                </div>
+          {/* CENTER: Search Bar (Centered in the available space) */}
+          <div className="hidden md:flex flex-1 justify-center px-8">
+            <div className="relative w-full max-w-lg">
+              <input
+                type="text"
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:bg-white transition-all"
+              />
+              <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
             </div>
-        </nav>
-    );
+          </div>
+
+          {/* RIGHT: User Menu (Pushed to the extreme right) */}
+          <div className="flex items-center space-x-8 flex-shrink-0">
+            {user ? (
+              <>
+                {user.role === 'admin' && (
+                  <Link to="/create-event" className="text-gray-600 hover:text-green-600 font-medium hidden lg:block">
+                    Create Event
+                  </Link>
+                )}
+                <Link to="/my-tickets" className="text-gray-600 hover:text-blue-600 font-medium whitespace-nowrap">
+                  My Tickets
+                </Link>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full border whitespace-nowrap">
+                    {user.name}
+                  </span>
+                  <button onClick={handleLogout} className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+                    Logout
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-gray-600 hover:text-blue-600 font-medium">Login</Link>
+                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Sign Up</Link>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Mobile Search Bar (Visible only on small screens) */}
+        <div className="md:hidden pb-4">
+           <div className="relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-100"
+              />
+              <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+           </div>
+        </div>
+      </div>
+    </nav>
+  );
 };
 
 export default Navbar;
