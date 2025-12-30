@@ -25,7 +25,7 @@ const getEventById = async (req, res) => {
 // @route   POST /api/events
 // @access  Public (We will make this Admin only later)
 const createEvent = async (req, res) => {
-  const { title, description, date, time, location, price, totalSeats } = req.body;
+  const { title, description, date, time, location, price, totalSeats, image } = req.body;
 
   const event = new Event({
     title,
@@ -35,7 +35,8 @@ const createEvent = async (req, res) => {
     location,
     price,
     totalSeats,
-    availableSeats: totalSeats, 
+    availableSeats: totalSeats,
+    image, 
   });
 
   const createdEvent = await event.save();

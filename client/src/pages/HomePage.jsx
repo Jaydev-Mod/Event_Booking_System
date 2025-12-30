@@ -23,6 +23,13 @@ const HomePage = () => {
     fetchEvents();
   }, []);
 
+  // 👇 HELPER FUNCTION to fix image URLs
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
+    if (imagePath.startsWith('http')) return imagePath; 
+    return `http://localhost:5000${imagePath}`; // Add server URL for local files
+  };
+
   if (loading) return <div className="text-center mt-10">Loading events...</div>;
   if (error) return <div className="text-center mt-10 text-red-500">{error}</div>;
 
@@ -32,6 +39,14 @@ const HomePage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => (
           <div key={event._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            
+            {/* 👇 USE HELPER FUNCTION HERE */}
+            <img 
+              src={getImageUrl(event.image)} 
+              alt={event.title} 
+              className="w-full h-48 object-cover"
+            />
+
             <div className="p-6">
               <h3 className="text-xl font-bold mb-2 text-gray-800">{event.title}</h3>
               <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
