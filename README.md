@@ -1,3 +1,8 @@
+Here is the **complete, final `README.md` code** with the screenshot section removed, as requested.
+
+You can copy this entire block and replace everything in your `README.md` file.
+
+```markdown
 # 🎟️ Event Booking System
 
 A full-stack MERN (MongoDB, Express, React, Node.js) application that allows users to browse events, book tickets securely, and receive email confirmations. Admins can manage events and view bookings.
@@ -36,44 +41,78 @@ Ensure you have the following installed:
 ```bash
 git clone <your-repository-url>
 cd EventBookingSystem
-3. Backend Setup (Server)
+
+```
+
+### 3. Backend Setup (Server)
+
 Navigate to the server folder and install dependencies:
 
-Bash
-
+```bash
 cd server
 npm install
-Configure Environment Variables: Create a .env file inside the server folder and add the following:
 
-Code snippet
+```
 
+**Configure Environment Variables:**
+Create a `.env` file inside the `server` folder and add the following:
+
+```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_key
-Start the Server:
 
-Bash
+```
 
+**Start the Server:**
+
+```bash
 npm run dev
-The server should now be running on http://localhost:5000
 
-4. Frontend Setup (Client)
+```
+
+*The server should now be running on `http://localhost:5000*`
+
+### 4. Frontend Setup (Client)
+
 Open a new terminal, navigate to the client folder, and install dependencies:
 
-Bash
-
+```bash
 cd client
 npm install
-Configure Environment Variables: Create a .env file inside the client folder and add your EmailJS keys:
 
-Code snippet
+```
 
+**Configure Environment Variables:**
+Create a `.env` file inside the `client` folder and add your EmailJS keys:
+
+```env
 VITE_EMAILJS_SERVICE_ID=your_service_id
 VITE_EMAILJS_TEMPLATE_ID=your_template_id
 VITE_EMAILJS_PUBLIC_KEY=your_public_key
-Start the React App:
 
-Bash
+```
 
+**Start the React App:**
+
+```bash
 npm run dev
-The application should now be running on http://localhost:5173
+
+```
+
+*The application should now be running on `http://localhost:5173*`
+
+---
+
+## 🧪 API Endpoints
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| **POST** | `/api/users/login` | Authenticate user & get token |
+| **POST** | `/api/users` | Register a new user |
+| **GET** | `/api/events` | Fetch all events |
+| **POST** | `/api/bookings` | Create a new booking (Protected) |
+
+```
+
+```
