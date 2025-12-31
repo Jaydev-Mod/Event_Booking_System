@@ -3,6 +3,8 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
 import { Lock, CreditCard, Calendar, User } from 'lucide-react';
+// 👇 1. Import EmailJS
+import emailjs from '@emailjs/browser';
 
 const PaymentPage = () => {
   const { id } = useParams();
@@ -15,7 +17,10 @@ const PaymentPage = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
 
-  // 👇 STATE FOR INPUT FORMATTING
+  const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+  const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+  const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+  
   const [cardData, setCardData] = useState({
     number: '',
     expiry: '',
@@ -46,12 +51,10 @@ const PaymentPage = () => {
     let formattedValue = value;
 
     if (name === 'number') {
-      // Remove non-digits, limit to 16, add space every 4
       const raw = value.replace(/\D/g, '').slice(0, 16);
       formattedValue = raw.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
     } 
     else if (name === 'expiry') {
-      // Remove non-digits, limit to 4, add slash after 2
       const raw = value.replace(/\D/g, '').slice(0, 4);
       if (raw.length >= 2) {
         formattedValue = `${raw.slice(0, 2)}/${raw.slice(2)}`;
@@ -60,7 +63,6 @@ const PaymentPage = () => {
       }
     } 
     else if (name === 'cvc') {
-      // Numbers only, max 3 digits
       formattedValue = value.replace(/\D/g, '').slice(0, 3);
     }
 
@@ -89,17 +91,42 @@ const PaymentPage = () => {
 
     setProcessing(true);
 
+    // 👇 3. DEFINE EMAIL FUNCTION
+    const sendConfirmationEmail = () => {
+      const templateParams = {
+        user_name: user.name,
+        user_email: user.email,
+        event_name: event.title,
+        amount: event.price * qty,
+        date: formatDate(event.date),
+        location: event.location,
+      };
+
+      emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+        .then((response) => {
+           console.log('EMAIL SUCCESS!', response.status, response.text);
+        }, (err) => {
+           console.log('EMAIL FAILED...', err);
+        });
+    };
+
     setTimeout(async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        
+        // 4. Create Booking (Existing Logic)
         await axios.post('/api/bookings', {
           eventId: id,
           numberOfTickets: qty,
           paymentId: `PAY-${Math.random().toString(36).substr(2, 9).toUpperCase()}` 
         }, config);
 
-        alert('Payment Successful! Ticket has been booked.');
+        // 👇 5. SEND EMAIL AFTER SUCCESSFUL BOOKING
+        sendConfirmationEmail();
+
+        alert(`Payment Successful! Ticket has been booked and sent to ${user.email}`);
         navigate('/my-tickets');
+        
       } catch (error) {
         alert('Booking failed. Please try again.');
         setProcessing(false);
@@ -142,6 +169,7 @@ const PaymentPage = () => {
             <div className="flex space-x-2">
               <div className="w-8 h-5 bg-blue-600 rounded"></div>
               <div className="w-8 h-5 bg-red-500 rounded"></div>
+              <div className="w-8 h-5 bg-yellow-500 rounded"></div>
             </div>
           </div>
 

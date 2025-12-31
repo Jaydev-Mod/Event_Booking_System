@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -11,14 +12,17 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login } = useContext(AuthContext); // Use global login function
+  // 👇 Independent toggles for each field
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { login } = useContext(AuthContext); 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // 1. Basic Validation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -27,18 +31,14 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      // 2. Call Backend API
-      // Note: The endpoint is usually POST /api/users
       const { data } = await axios.post('/api/users', { 
         name, 
         email, 
         password 
       });
       
-      // 3. Auto-Login the user
-      login(data);
+      login(data); 
       
-      // 4. Redirect to Home
       alert('Registration Successful!');
       navigate('/');
       
@@ -64,7 +64,6 @@ const RegisterPage = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full p-2 border rounded focus:outline-blue-500"
-              //placeholder="John Doe"
               required
             />
           </div>
@@ -76,33 +75,50 @@ const RegisterPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-2 border rounded focus:outline-blue-500"
-              //placeholder="john@example.com"
               required
             />
           </div>
           
+          {/* 👇 Password Field */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded focus:outline-blue-500"
-              //placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 pr-10 border rounded focus:outline-blue-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
+          {/* 👇 Confirm Password Field (Now with Eye Icon) */}
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">Confirm Password</label>
-            <input 
-              type="password" 
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full p-2 border rounded focus:outline-blue-500"
-              //placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input 
+                type={showConfirmPassword ? "text" : "password"} // 👈 Uses independent state
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full p-2 pr-10 border rounded focus:outline-blue-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
           
           <button 
