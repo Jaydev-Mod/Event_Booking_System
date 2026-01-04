@@ -41,12 +41,13 @@ Check versions:
 ```bash
 node -v
 npm -v
+```
 
-2. Clone the Repository
+### 2. Clone the Repository
 git clone <your-repository-url>
 cd EventBookingSystem
 
-3. Backend Setup (Server)
+### 3. Backend Setup (Server)
 cd server
 npm install
 
@@ -67,7 +68,7 @@ Server runs on:
 
 http://localhost:5000
 
-4. Frontend Setup (Client)
+### 4. Frontend Setup (Client)
 
 Open a new terminal:
 
