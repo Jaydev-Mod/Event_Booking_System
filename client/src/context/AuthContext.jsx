@@ -15,15 +15,18 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
 
-    // 2. Setup Axios Interceptor (The Security Guard)
+    // 2. Setup Axios Interceptor
     const interceptor = axios.interceptors.response.use(
-      (response) => response, // If response is good, do nothing
+      (response) => response,
       (error) => {
-        // If Backend says "401 Unauthorized" (Token bad/expired)
-        if (error.response && error.response.status === 401) {
+        // CHECK URL: Don't redirect if the error came from the '/login' endpoint!
+        if (
+            error.response && 
+            error.response.status === 401 && 
+            !error.config.url.includes('/login') // <--- ADD THIS CHECK
+        ) {
           localStorage.removeItem('userInfo');
           setUser(null);
-          // Hard redirect to login to clear state
           window.location.href = '/login'; 
         }
         return Promise.reject(error);

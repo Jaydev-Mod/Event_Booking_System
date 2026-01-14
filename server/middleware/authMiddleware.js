@@ -24,10 +24,9 @@ const protect = async (req, res, next) => {
   }
 };
 
-// 👇 NEW ADMIN MIDDLEWARE
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
-    next(); // Keep going
+    next(); 
   } else {
     res.status(401).json({ message: 'Not authorized as an admin' });
   }

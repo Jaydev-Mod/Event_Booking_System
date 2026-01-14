@@ -22,7 +22,7 @@ const LoginPage = () => {
       login(data); 
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Invalid Credentials');
     }
   };
 

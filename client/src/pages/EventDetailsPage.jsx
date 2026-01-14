@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'; // 👈 1. Impo
 import axios from 'axios';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import AuthContext from '../context/AuthContext';
+import emailjs from '@emailjs/browser';
 
 const EventDetailsPage = () => {
   const { id } = useParams();
@@ -14,6 +15,10 @@ const EventDetailsPage = () => {
   const [error, setError] = useState(null);
   const [ticketCount, setTicketCount] = useState(1);
   const [bookingLoading, setBookingLoading] = useState(false);
+
+  const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+  const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+  const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -29,14 +34,69 @@ const EventDetailsPage = () => {
     fetchEvent();
   }, [id]);
 
-  // 👇 3. This function handles the redirect
-  const handleBookTicket = () => {
+  const sendConfirmationEmail = () => {
+    const templateParams = {
+      user_name: user.name,
+      user_email: user.email,
+      event_name: event.title, // Note: Make sure your template uses {{event_name}}
+      amount: "FREE",
+      date: new Date(event.date).toLocaleDateString(),
+      location: event.location,
+      ticket_count: ticketCount, // Optional: Add this to your email template if needed
+    };
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+      .then((response) => {
+         console.log('EMAIL SUCCESS!', response.status, response.text);
+      }, (err) => {
+         console.log('EMAIL FAILED...', err);
+      });
+  };
+
+  const handleBookTicket = async () => {
     if (!user) {
       alert('Please login to book tickets');
       navigate('/login');
       return;
     }
-    navigate(`/payment/${id}?qty=${ticketCount}`);
+
+    // Logic for FREE Events
+    if (event.price === 0) {
+      const confirmBooking = window.confirm(`Confirm booking for ${ticketCount} free ticket(s)?`);
+      if (!confirmBooking) return;
+
+      try {
+        setBookingLoading(true);
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+
+        // A. Call Booking API
+        await axios.post('/api/bookings', {
+          eventId: event._id,
+          numberOfTickets: ticketCount
+        }, config);
+
+        // B. Send Email (Clean Function Call) 👇
+        sendConfirmationEmail();
+
+        alert('🎉 Booking Successful! Check your email for confirmation.');
+        navigate('/'); 
+
+      } catch (error) {
+        console.error("Booking Error:", error);
+        alert(error.response?.data?.message || 'Booking failed');
+      } finally {
+        setBookingLoading(false);
+      }
+    } 
+    // Logic for PAID Events
+    else {
+      navigate(`/payment/${id}?qty=${ticketCount}`);
+    }
   };
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
